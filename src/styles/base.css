@@ -13,7 +13,7 @@
   --english: 'Cormorant Garamond', Georgia, serif;
   --radius-card: 10px;
   --radius-panel: 16px;
-  --page-gutter: clamp(24px, 4.3vw, 70px);
+  --page-gutter: clamp(20px, 3.8vw, 56px);
   --transition: 220ms cubic-bezier(.2, .65, .3, 1);
   font-family: var(--sans);
   color: var(--ink);
@@ -38,7 +38,7 @@ h1, h2, h3, h4, p { margin: 0; }
 h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 :focus-visible { outline: 2px solid var(--wine); outline-offset: 5px; }
 main:focus { outline: 0; }
-::selection { background: #dcc4b7; color: var(--ink); }
+::selection { background: #e8ddd0; color: var(--ink); }
 .page-width { width: calc(100% - var(--page-gutter) * 2); max-width: 1280px; margin-inline: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; left: 16px; top: 12px; padding: 12px 20px; background: var(--wine); color: white; z-index: 100; transform: translateY(-180%); border-radius: 6px; }
