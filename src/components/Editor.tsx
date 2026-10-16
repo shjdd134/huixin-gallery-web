@@ -7,6 +7,7 @@ import { spaces, getSpace, defaultSubtype, type SpaceId } from '../data/spaces';
 import { compressCover } from '../data/images';
 import { INTRODUCTION_MAX } from '../data/introduction';
 import { useDraftGuard } from './DraftGuard';
+import { searchBooks, coverUrl, fetchDescription, type BookHit } from '../data/openlibrary';
 
 export function Editor({ existing, initialSpace, initialSubtype, onClose, onSaved, onBatch }: { existing?: Collection; initialSpace: SpaceId; initialSubtype?: string; onClose: () => void; onSaved: (item: Collection) => void; onBatch?: () => void }) {
   const [item, setItem] = useState<Collection>(() => existing
@@ -16,6 +17,8 @@ export function Editor({ existing, initialSpace, initialSubtype, onClose, onSave
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
+  const [bookHits, setBookHits] = useState<BookHit[]>([]);
+  const [searching, setSearching] = useState(false);
   const [baseline] = useState(() => ({ item, tagsText }));
   const dirty = tagsText !== baseline.tagsText || item.cover !== baseline.item.cover || item.thumbnail !== baseline.item.thumbnail
     || (['title', 'space', 'subtype', 'creator', 'url', 'loveLevel', 'note', 'filmList', 'encounterText', 'quote', 'treasure', 'revisit', 'introduction'] as const)
@@ -40,9 +43,42 @@ export function Editor({ existing, initialSpace, initialSubtype, onClose, onSave
     try { const actual = await saveCollection(saved, existing); onSaved(actual); }
     catch (reason) { setError(storageError(reason)); setBusy(false); }
   }
+  async function lookupBook() {
+    if (!item.title.trim() || searching) return;
+    setSearching(true); setError(''); setBookHits([]);
+    try {
+      const hits = await searchBooks(item.title);
+      setBookHits(hits);
+      if (!hits.length) setError('没有找到相关书籍');
+    } catch (e) { setError('搜索失败，请稍后再试'); }
+    finally { setSearching(false); }
+  }
+  async function pickBook(hit: BookHit) {
+    setSearching(true); setError('');
+    try {
+      const desc = await fetchDescription(hit.key);
+      const introText = (desc || hit.firstSentence || '').slice(0, 2000);
+      setItem(old => ({
+        ...old,
+        title: hit.title || old.title,
+        creator: hit.author || old.creator,
+        introduction: introText ? { text: introText, sourceName: 'Open Library', sourceUrl: `https://openlibrary.org${hit.key}`, kind: 'official-summary' as const } : old.introduction,
+      }));
+      if (hit.coverId) {
+        const url = coverUrl(hit.coverId);
+        const blob = await fetch(url).then(r => r.blob());
+        const file = new File([blob], 'cover.jpg', { type: blob.type || 'image/jpeg' });
+        const image = await compressCover(file);
+        setItem(old => ({ ...old, ...image }));
+      }
+      setBookHits([]);
+    } catch (e) { setError('获取详情失败'); }
+    finally { setSearching(false); }
+  }
   return <Modal title={existing ? '编辑这份喜欢' : '留下新的喜欢'} onClose={() => guard(onClose)} closeNotice={notice} className="editor-modal"><form onSubmit={submit}><fieldset className="editor-fields" disabled={busy || imageBusy}>
     <p className="modal-intro">{item.space === 'website' ? '填写名称与网址，再写下它能帮你做什么。' : '只填名称，就可以先留下。其余的，慢慢补。'}</p>
-    <div className={`editor-basic ${item.space === 'website' ? 'website-basic' : ''}`}>{item.space !== 'website' && <label className={`cover-uploader ${coverUrl ? 'has-cover' : ''}`}><input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" aria-label="上传封面" disabled={imageBusy || busy} onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />{coverUrl ? <img src={coverUrl} alt="封面预览" /> : <ImageIcon size={28} weight="light" />}<span>{imageBusy ? '正在处理' : coverUrl ? '更换封面' : '添加封面'}</span></label>}<div className="editor-primary-fields"><label className="form-field"><span>{item.space === 'website' ? '网站名称' : '名称'} <span className="required-note">必填</span></span><input autoFocus data-autofocus value={item.title} onChange={event => update('title', event.target.value)} aria-label={item.space === 'website' ? '网站名称' : undefined} placeholder={item.space === 'person' ? '一个你想记住的人' : item.space === 'website' ? '常用的网站或工具' : '一件你真正喜欢的作品'} required maxLength={120} /></label><div className="form-row"><label className="form-field"><span>放进哪个空间</span><select value={item.space} onChange={event => { const next = event.target.value as SpaceId; setItem(old => ({ ...old, space: next, subtype: defaultSubtype(next) })); }}>{spaces.map(option => <option key={option.id} value={option.id}>{option.title}</option>)}</select></label>{item.space === 'book' && <label className="form-field"><span>类别</span><select value={item.subtype} onChange={event => update('subtype', event.target.value)}><option value="traditional">传统文学</option><option value="web">网文</option><option value="light">轻小说</option></select></label>}{item.space === 'film' && <label className="form-field"><span>类别</span><select value={item.subtype || 'movie'} onChange={event => update('subtype', event.target.value)}><option value="movie">电影</option><option value="series">电视剧</option></select></label>}{item.space === 'music' && <label className="form-field"><span>类别</span><select value={item.subtype} onChange={event => update('subtype', event.target.value)}><option value="song">歌曲</option><option value="artist">歌手</option></select></label>}</div></div></div>
+    <div className={`editor-basic ${item.space === 'website' ? 'website-basic' : ''}`}>{item.space !== 'website' && <label className={`cover-uploader ${coverUrl ? 'has-cover' : ''}`}><input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" aria-label="上传封面" disabled={imageBusy || busy} onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />{coverUrl ? <img src={coverUrl} alt="封面预览" /> : <ImageIcon size={28} weight="light" />}<span>{imageBusy ? '正在处理' : coverUrl ? '更换封面' : '添加封面'}</span></label>}<div className="editor-primary-fields"><label className="form-field"><span>{item.space === 'website' ? '网站名称' : '名称'} <span className="required-note">必填</span></span><div style={{display:'flex',gap:8}}><input autoFocus data-autofocus value={item.title} onChange={event => update('title', event.target.value)} style={{flex:1}} aria-label={item.space === 'website' ? '网站名称' : undefined} placeholder={item.space === 'person' ? '一个你想记住的人' : item.space === 'website' ? '常用的网站或工具' : '一件你真正喜欢的作品'} required maxLength={120} />{item.space === 'book' && <button type="button" className="button outline" style={{whiteSpace:'nowrap'}} disabled={searching || !item.title.trim()} onClick={() => void lookupBook()}>{searching ? '查找中' : '查找'}</button>}</div></label><div className="form-row"><label className="form-field"><span>放进哪个空间</span><select value={item.space} onChange={event => { const next = event.target.value as SpaceId; setItem(old => ({ ...old, space: next, subtype: defaultSubtype(next) })); }}>{spaces.map(option => <option key={option.id} value={option.id}>{option.title}</option>)}</select></label>{item.space === 'book' && <label className="form-field"><span>类别</span><select value={item.subtype} onChange={event => update('subtype', event.target.value)}><option value="traditional">传统文学</option><option value="web">网文</option><option value="light">轻小说</option></select></label>}{item.space === 'film' && <label className="form-field"><span>类别</span><select value={item.subtype || 'movie'} onChange={event => update('subtype', event.target.value)}><option value="movie">电影</option><option value="series">电视剧</option></select></label>}{item.space === 'music' && <label className="form-field"><span>类别</span><select value={item.subtype} onChange={event => update('subtype', event.target.value)}><option value="song">歌曲</option><option value="artist">歌手</option></select></label>}</div></div></div>
+    {bookHits.length > 0 && <div className="book-hits" style={{margin:'8px 0',display:'flex',flexDirection:'column',gap:6}}>{bookHits.map(hit => <button key={hit.key} type="button" className="text-button" style={{textAlign:'left',padding:'6px 0'}} onClick={() => void pickBook(hit)}>{hit.title}{hit.author ? ` · ${hit.author}` : ''}</button>)}</div>}
     {coverUrl && <button type="button" className="text-button remove-cover" onClick={() => setItem(old => ({ ...old, cover: undefined, thumbnail: undefined }))}>移除封面</button>}
     {item.space === 'website' && <label className="form-field website-url-field"><span>网站地址 <span className="required-note">必填</span></span><input aria-label="网站地址" value={item.url || ''} onChange={event => update('url', event.target.value)} placeholder="https://example.com" required maxLength={2048} autoCapitalize="none" autoCorrect="off" spellCheck={false} /><small>可粘贴完整网址；没有协议时默认使用 https。</small></label>}
     <div className="editor-reason"><label className="form-field"><span>{space.noteLabel}</span><textarea aria-label={space.noteLabel} value={item.note} onChange={event => update('note', event.target.value)} placeholder={item.space === 'website' ? '这个网站可以做什么？你通常在什么情况下使用它？' : '一个瞬间、一句话，或一种感觉……'} maxLength={10000} rows={4} /></label></div>
