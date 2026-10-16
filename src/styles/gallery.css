@@ -12,7 +12,7 @@
 .header-actions .text-button { min-height: 44px; }
 .header-add { margin-left: 12px; padding-inline: 18px; }
 .mobile-nav { display: none; }
-.home-hero { position: relative; isolation: isolate; height: 220px; overflow: hidden; }
+.home-hero { position: relative; isolation: isolate; height: 180px; overflow: hidden; }
 .hero-image { position: absolute; top: 0; right: 0; width: 65%; height: 100%; z-index: -1; }
 .hero-image .atmosphere { object-position: center 54%; }
 .hero-image::after { content: ''; position: absolute; inset: -1px; background: linear-gradient(90deg, var(--paper) 0%, #f7f4eedd 12%, #f7f4ee65 30%, #f7f4ee00 60%), linear-gradient(0deg, #f7f4ee 0%, #f7f4ee00 18%); }
@@ -49,7 +49,7 @@
 .space-card-content { height: 100%; padding: 22px 28px; display: flex; flex-direction: column; justify-content: space-between; }
 .space-card-top { display: flex; justify-content: space-between; gap: 12px; }
 .space-english { font-family: var(--english); font-style: italic; font-size: 17px; line-height: 1.5; color: #e5d9c8; }
-.space-card h3 { font-size: 28px; line-height: 1.3; letter-spacing: .04em; margin-top: 2px; }
+.space-card h3 { font-size: 26px; line-height: 1.3; letter-spacing: .04em; margin-top: 2px; }
 .space-category { font-size: 13px; letter-spacing: .08em; margin-top: 6px; line-height: 1.5; color: #f3e7da; }
 .door-icon { border: 1px solid #fff9f147; width: 37px; height: 37px; display: grid; place-items: center; border-radius: 50%; margin-top: 8px; transition: background var(--transition); }
 .space-card-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
@@ -65,7 +65,7 @@
 .home-collect-strip > div:first-child { display: flex; align-items: center; gap: 13px; color: var(--wine); }
 .home-collect-strip p { font-family: var(--serif); font-size: 16px; letter-spacing: .03em; }
 .curated-section .section-heading > .text-button { flex-shrink: 0; white-space: nowrap; min-height: 44px; }
-.collection-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 16px; row-gap: 20px; }
+.collection-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 14px; row-gap: 18px; }
 .collection-card { text-align: left; display: block; align-self: start; padding: 0; background: transparent; border-radius: var(--radius-card); }
 .collection-cover { position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 8px; background: var(--paper-deep); }
 .collection-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms ease; }
