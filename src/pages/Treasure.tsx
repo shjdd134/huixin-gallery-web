@@ -46,7 +46,7 @@ export function Treasure({ items, loading, onOpen }: { items: Collection[]; load
   return <div className="treasure-page page-width" aria-busy={!!saving || loading}>
     <header className="treasure-page-heading">
       <h1 id="treasure-title">我的珍藏</h1>
-      <p className="treasure-page-summary">{loading ? '正在打开收藏……' : `${items.length} 件收藏，来自五个空间。`}</p>
+      <p className="treasure-page-summary">{loading ? '正在打开收藏……' : `${items.length} 件收藏，来自各个收藏空间。`}</p>
     </header>
     <nav className="treasure-page-filters" aria-label="珍藏等级筛选">
       <button type="button" data-filter="all" aria-pressed={filter === 'all'} className={`choice-button ${filter === 'all' ? 'selected' : ''}`} onClick={() => changeFilter('all')}>全部 <span className="treasure-page-count">{items.length}</span></button>

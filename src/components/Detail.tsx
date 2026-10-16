@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { websiteLink } from '../data/websites';
 import { db, saveCollection, storageError, type Collection } from '../data/db';
 import { getSpace, subtypeLabel } from '../data/spaces';
 import { useBlobUrl } from './Image';
@@ -65,6 +66,7 @@ export function Detail({ item, removed = false, onClose, onEdit, onDeleted, onDi
       <div className="detail-heading">
         <p className="detail-meta">{space.title} · {subtypeLabel(item.subtype) || (item.space === 'film' ? '电影' : space.category)}</p>
         <h3>{item.title}</h3>
+        {item.space === 'website' && websiteLink(item.url) && <div className="website-detail-link"><p className="website-address">{item.url}</p><a className="button outline" href={websiteLink(item.url)} target="_blank" rel="noopener noreferrer">打开网站</a></div>}
         {item.creator && <p className="detail-creator">{item.creator}</p>}
         <button className="text-button detail-edit" aria-label="编辑收藏" onClick={() => guard(() => onEdit(item))} disabled={locked || removed}><PencilSimpleIcon size={17} /><span>编辑收藏</span></button>
       </div>
@@ -76,16 +78,16 @@ export function Detail({ item, removed = false, onClose, onEdit, onDeleted, onDi
     <section className="detail-note" aria-label={space.noteLabel}>
       <div className="detail-section-heading"><h4>{space.noteLabel}</h4></div>
       <div className="detail-writing direct-writing">
-        <textarea ref={reasonInput} className="personal-note reason-input writing-input" aria-label={space.noteLabel} value={reasonDraft.text} onChange={event => { setReasonDraft(old => ({ ...old, text: event.target.value })); setReasonSaved(false); }} placeholder="写下喜欢的理由，或一个打动你的片段……" rows={2} maxLength={10000} disabled={locked} />
-        {reasonDirty && <div className="reason-actions"><button className="button outline" disabled={locked || removed} onClick={() => void saveReason()}>保存理由</button><button className="text-button" disabled={locked} onClick={cancelReason}>取消编辑</button></div>}
+        <textarea ref={reasonInput} className="personal-note reason-input writing-input" aria-label={space.noteLabel} value={reasonDraft.text} onChange={event => { setReasonDraft(old => ({ ...old, text: event.target.value })); setReasonSaved(false); }} placeholder={item.space === 'website' ? '写下网站的功能和适合使用的场景……' : '写下喜欢的理由，或一个打动你的片段……'} rows={2} maxLength={10000} disabled={locked} />
+        {reasonDirty && <div className="reason-actions"><button className="button outline" disabled={locked || removed} onClick={() => void saveReason()}>{item.space === 'website' ? '保存用途' : '保存理由'}</button><button className="text-button" disabled={locked} onClick={cancelReason}>取消编辑</button></div>}
       </div>
       {error && errorScope === 'reason' && <p className="inline-error" role="alert">{error}</p>}
-      {reasonSaved && <span className="detail-saved" role="status">理由已保存</span>}
+      {reasonSaved && <span className="detail-saved" role="status">{item.space === 'website' ? '用途已保存' : '理由已保存'}</span>}
       {item.tags.length > 0 && <div className="tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div>}
       {item.filmList && <p className="film-list-note">私藏影单 · {item.filmList}</p>}
       {item.encounterText && <p className="detail-encounter">什么时候遇见 · {item.encounterText}</p>}
       {item.quote && <blockquote className="detail-quote"><p>{item.quote}</p></blockquote>}
-      <button className="text-button detail-discovery" onClick={() => void discover()} disabled={locked || removed}>沿着这些理由探索兴趣</button>
+      {item.space !== 'website' && <button className="text-button detail-discovery" onClick={() => void discover()} disabled={locked || removed}>沿着这些理由探索兴趣</button>}
     </section>
     <Journal item={item} removed={removed} disabled={locked} guard={guard} onStateChange={setJournalState} />
     {error && errorScope === 'delete' && <p className="inline-error" role="alert">{error}</p>}

@@ -5,6 +5,7 @@ import { emptyDiscovery, validateDiscovery, type DiscoveryState } from '../featu
 import { isSpaceId, isValidSubtype } from './spaces';
 import { validateIntroduction } from './introduction';
 import { isLoveLevel } from './levels';
+import { normalizeWebsiteUrl } from './websites';
 
 export interface Backup { items: Collection[]; home?: string[]; discovery?: DiscoveryState }
 interface StoredItem extends Omit<Collection, 'cover' | 'thumbnail'> { coverPath?: string; thumbnailPath?: string; coverType?: string; thumbnailType?: string }
@@ -45,7 +46,7 @@ export async function createBackup(): Promise<Blob> {
   if (home) { try { homeIds = JSON.parse(home); } catch { homeIds = []; } }
   // Only the new interest value needs v5. Older APKs must reject it rather than
   // silently losing a level; unchanged collections remain exportable as v4.
-  const version = items.some(item => item.loveLevel === 'interest') ? 5 : 4;
+  const version = items.some(item => item.space === 'website') ? 6 : items.some(item => item.loveLevel === 'interest') ? 5 : 4;
   const metadata = JSON.stringify({ format: 'huixin-gallery', version, discovery, exportedAt, collections: entries, home: Array.isArray(homeIds) ? homeIds : [] });
   if (new Blob([metadata]).size > 15 * 1024 * 1024) throw new Error('记录文字超过本版备份容量，暂时无法生成完整包。现有馆藏没有改变。');
   zip.file('huixin.json', metadata);
@@ -79,8 +80,8 @@ export async function readBackup(file: Blob): Promise<Backup> {
   let parsed: { format?: unknown; version?: unknown; collections?: unknown; home?: unknown; discovery?: unknown };
   try { parsed = JSON.parse(await metadata.async('string')); }
   catch { return fail(); }
-  if (parsed.format !== 'huixin-gallery' || typeof parsed.version !== 'number' || !Number.isInteger(parsed.version) || parsed.version < 1 || parsed.version > 5 || !Array.isArray(parsed.collections) || parsed.collections.length > COLLECTIONS_MAX) return fail();
-  const version = parsed.version as 1 | 2 | 3 | 4 | 5;
+  if (parsed.format !== 'huixin-gallery' || typeof parsed.version !== 'number' || !Number.isInteger(parsed.version) || parsed.version < 1 || parsed.version > 6 || !Array.isArray(parsed.collections) || parsed.collections.length > COLLECTIONS_MAX) return fail();
+  const version = parsed.version as 1 | 2 | 3 | 4 | 5 | 6;
   // version 2 added encounterText/quote and the home layout. v1 backups keep restoring with
   // defaults; a v2 backup is rejected outright by pre-v2 programs instead of silently losing fields.
   let home: string[] | undefined;
@@ -99,6 +100,11 @@ export async function readBackup(file: Blob): Promise<Backup> {
     const item = data as StoredItem;
     if (typeof item.id !== 'string' || !/^[a-zA-Z0-9-]{1,80}$/.test(item.id) || ids.has(item.id) || !isSpaceId(item.space) || !validText(item.title, 120) || !item.title.trim() || !validText(item.creator, 120) || !validText(item.note, 10000) || !validText(item.filmList, 80) || typeof item.treasure !== 'boolean' || typeof item.revisit !== 'boolean' || !isLoveLevel(item.loveLevel) || (version < 5 && item.loveLevel === 'interest') || !validDate(item.createdAt) || !validDate(item.updatedAt)) return fail();
     if (version >= 2 && (!validText(item.encounterText, ENCOUNTER_TEXT_MAX) || !validText(item.quote, QUOTE_MAX))) return fail();
+    let url: string | undefined;
+    if (item.space === 'website') {
+      if (version < 6 || !validText(item.url, 2048)) return fail();
+      try { url = normalizeWebsiteUrl(item.url!); } catch { return fail(); }
+    }
     const encounterText = validText(item.encounterText, ENCOUNTER_TEXT_MAX) ? item.encounterText : '';
     const quote = validText(item.quote, QUOTE_MAX) ? item.quote : '';
     let introduction;
@@ -119,7 +125,7 @@ export async function readBackup(file: Blob): Promise<Backup> {
     const cover = await readImage(item.coverPath, item.coverType, 'cover');
     const thumbnail = await readImage(item.thumbnailPath, item.thumbnailType, 'thumbnail');
     // Construct known fields explicitly; never restore arbitrary properties from a file.
-    result.push({ id: item.id, space: item.space, subtype: item.subtype, title: item.title, creator: item.creator, introduction, loveLevel: item.loveLevel, note: item.note, encounterText, quote, tags: [...new Set(item.tags)], filmList: item.filmList, treasure: item.treasure, revisit: item.revisit, journal: item.journal.map(note => ({ id: note.id, text: note.text, date: note.date })), createdAt: item.createdAt, updatedAt: item.updatedAt, cover, thumbnail });
+    result.push({ id: item.id, space: item.space, subtype: item.subtype, title: item.title, creator: item.creator, url, introduction, loveLevel: item.loveLevel, note: item.note, encounterText, quote, tags: [...new Set(item.tags)], filmList: item.filmList, treasure: item.treasure, revisit: item.revisit, journal: item.journal.map(note => ({ id: note.id, text: note.text, date: note.date })), createdAt: item.createdAt, updatedAt: item.updatedAt, cover, thumbnail });
   }
   return { items: result, home, discovery };
 }

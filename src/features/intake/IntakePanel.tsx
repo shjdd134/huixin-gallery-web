@@ -119,7 +119,7 @@ export function IntakePanel({ initialSpace, items, initialSummary, onClose, onOp
     </> : <>
       <p className="modal-intro">粘贴书单、片单或想收藏的名称，一行一件，支持常见编号。只填名称，其余以后慢慢补。</p>
       <div className="form-row intake-options">
-        <label className="form-field"><span>放进哪个空间</span><select value={space} onChange={event => changeSpace(event.target.value as SpaceId)}>{spaces.map(option => <option key={option.id} value={option.id}>{option.title}</option>)}</select></label>
+        <label className="form-field"><span>放进哪个空间</span><select value={space} onChange={event => changeSpace(event.target.value as SpaceId)}>{spaces.filter(option => option.id !== 'website').map(option => <option key={option.id} value={option.id}>{option.title}</option>)}</select></label>
         {options && <label className="form-field"><span>类别</span><select value={subtype} onChange={event => setSubtype(event.target.value)}>{options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>}
       </div>
       <label className="form-field"><span>书单、片单或名称列表</span><textarea autoFocus data-autofocus className="intake-textarea" value={text} onChange={event => changeText(event.target.value)} placeholder={'例如：\n1. 某件作品\n2、某件作品\n（3）某件作品\n- 深空彼岸'} /></label>

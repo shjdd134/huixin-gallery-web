@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import { defaultSubtype, isSpaceId, isValidSubtype, type SpaceId } from './spaces';
 import { validateIntroduction, type Introduction } from './introduction';
 import { isLoveLevel } from './levels';
+import { normalizeWebsiteUrl } from './websites';
 
 export interface JournalEntry { id: string; text: string; date: string }
 export interface Collection {
@@ -10,6 +11,7 @@ export interface Collection {
   subtype: string;
   title: string;
   creator: string;
+  url?: string;
   /** 作品/人物介绍与出处；与个人喜欢理由分开。旧记录可缺省。 */
   introduction?: Introduction;
   cover?: Blob;
@@ -73,14 +75,15 @@ export async function saveCollection(item: Collection, baseline?: Collection) {
   if (encounterText.length > ENCOUNTER_TEXT_MAX) throw new Error(`什么时候遇见的，请控制在 ${ENCOUNTER_TEXT_MAX} 字以内。`);
   const quote = (item.quote || '').trim();
   if (quote.length > QUOTE_MAX) throw new Error(`想留下的一句话，请控制在 ${QUOTE_MAX} 字以内。`);
+  const url = item.space === 'website' ? normalizeWebsiteUrl(item.url || '') : undefined;
   const introduction = validateIntroduction(item.introduction);
-  const normalized = { ...item, introduction, title, creator: item.creator.trim(), encounterText, quote, tags: [...new Set(item.tags.map(tag => tag.trim()).filter(Boolean))].slice(0, 12), updatedAt: new Date().toISOString() };
+  const normalized = { ...item, url, introduction, title, creator: item.creator.trim(), encounterText, quote, tags: [...new Set(item.tags.map(tag => tag.trim()).filter(Boolean))].slice(0, 12), updatedAt: new Date().toISOString() };
   const stored = await db.transaction('rw', db.collections, async () => {
     const latest = await db.collections.get(item.id);
     if (baseline && !latest) throw new Error('这件收藏已在另一个页面移除，未重新创建。请关闭编辑后查看馆藏。');
     if (baseline && latest) {
       const edited: Collection = { ...latest, updatedAt: normalized.updatedAt };
-      const fields = ['space', 'subtype', 'title', 'creator', 'introduction', 'cover', 'thumbnail', 'loveLevel', 'note', 'encounterText', 'quote', 'tags', 'filmList', 'treasure', 'revisit'] as const;
+      const fields = ['space', 'subtype', 'title', 'creator', 'url', 'introduction', 'cover', 'thumbnail', 'loveLevel', 'note', 'encounterText', 'quote', 'tags', 'filmList', 'treasure', 'revisit'] as const;
       for (const field of fields) {
         const before = field === 'tags' || field === 'introduction' ? JSON.stringify(baseline[field]) : baseline[field];
         const next = field === 'tags' || field === 'introduction' ? JSON.stringify(normalized[field]) : normalized[field];
@@ -168,7 +171,7 @@ export async function restoreJournal(id: string, entry: JournalEntry, index: num
 }
 
 export function matchesSearch(item: Collection, query: string) {
-  const text = [item.title, item.creator, item.note, item.encounterText || '', item.quote || '', ...item.tags, item.filmList, ...item.journal.map(entry => entry.text)].join(' ').normalize('NFKC').toLocaleLowerCase();
+  const text = [item.title, item.creator, item.url || '', item.note, item.encounterText || '', item.quote || '', ...item.tags, item.filmList, ...item.journal.map(entry => entry.text)].join(' ').normalize('NFKC').toLocaleLowerCase();
   return query.normalize('NFKC').trim().toLocaleLowerCase().split(/\s+/).every(word => text.includes(word));
 }
 

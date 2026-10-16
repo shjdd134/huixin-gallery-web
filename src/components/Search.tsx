@@ -29,7 +29,7 @@ export function Search({ items, initialQuery = '', onQueryChange, onClose, onOpe
     });
   }, [discovery, query]);
   return <Modal title="重新找到喜欢" onClose={onClose} className="search-modal">
-    <label htmlFor="collection-search" className="field-label">名称、创作者、感受或标签</label>
+    <label htmlFor="collection-search" className="field-label">名称、网址、用途、感受或标签</label>
     <div className="search-input-wrap"><MagnifyingGlassIcon size={22} weight="light" /><input id="collection-search" type="search" value={query} autoFocus data-autofocus placeholder="在所有空间里找一找" onChange={event => change(event.target.value)} autoComplete="off" /></div>
     <p className="search-hint">也能找回体验心得、遇到的阻碍和下一步。</p>
     <div className="search-results" aria-live="polite">{!query.trim() ? <div className="search-empty"><p>每一份喜欢，都有迹可循。</p><span>{items.length ? `在 ${items.length} 件收藏和已保存心得中搜索。` : '添加收藏后，就可以在这里重新找到它们。'}</span></div> : !results.length && !trialResults.length ? <div className="search-empty"><p>{discovery ? '还没有找到这份喜欢。' : '正在查找已保存心得……'}</p><span>换一个名称，或试试你留下的感受。</span></div> : <>

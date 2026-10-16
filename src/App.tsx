@@ -2,7 +2,7 @@ import { Component, Suspense, lazy, useEffect, useRef, useState, type ReactNode 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { IconContext } from '@phosphor-icons/react';
 import { db, storageError, type Collection } from './data/db';
-import { isSpaceId, type SpaceId } from './data/spaces';
+import { isSpaceId, isActiveSpaceId, type SpaceId } from './data/spaces';
 import { Header, type GalleryRoute } from './components/Header';
 import { Editor } from './components/Editor';
 import { Detail } from './components/Detail';
@@ -18,7 +18,7 @@ import { requestDraftNavigation } from './components/DraftGuard';
 const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
 
 type Panel = { type: 'mixed-intake'; space?: SpaceId; subtype?: string; summary?: MixedSummary } | { type: 'discovery'; trialId?: string; from?: Panel } | { type: 'add'; space: SpaceId; subtype?: string } | { type: 'edit'; item: Collection } | { type: 'detail'; id: string; from?: Panel } | { type: 'search'; query?: string } | { type: 'settings' } | { type: 'intake'; space: SpaceId; summary?: IntakeSummary } | null;
-function routeFromHash(): GalleryRoute | null { const route = location.hash.replace(/^#\/?/, ''); return route === 'treasure' ? route : isSpaceId(route) ? route : null; }
+function routeFromHash(): GalleryRoute | null { const route = location.hash.replace(/^#\/?/, ''); return route === 'treasure' ? route : isActiveSpaceId(route) ? route : null; }
 function historyEntryIndex(): number | undefined {
   const index = (window as Window & { navigation?: { currentEntry?: { index?: number } } }).navigation?.currentEntry?.index;
   return typeof index === 'number' && index >= 0 ? index : undefined;
@@ -34,7 +34,7 @@ export default function App() {
   // 从详情进入编辑时记下来源；保存或取消后回到原来的详情（含搜索返回栈）。
   const editOrigin = useRef<Panel>(null);
   const collections = useLiveQuery(() => db.collections.orderBy('updatedAt').reverse().toArray());
-  const items = collections || [];
+  const items = collections?.filter(item => isActiveSpaceId(item.space)) || [];
   const selected = panel?.type === 'detail' ? items.find(item => item.id === panel.id) : undefined;
   const detailSnapshot = useRef<Collection | undefined>(undefined);
   if (selected) detailSnapshot.current = selected;
@@ -80,7 +80,7 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
   useEffect(() => { requestAnimationFrame(() => window.scrollTo({ top: scrollPositions.current[current || 'home'] || 0, behavior: 'instant' })); }, [current]);
-  useEffect(() => { document.title = current ? `${{ treasure: '珍藏', book: '书房', film: '放映厅', music: '唱片馆', game: '游戏室', person: '人物长廊' }[current]} · 会心馆` : '会心馆 · 会于心者，藏于此间。'; }, [current]);
+  useEffect(() => { document.title = current ? `${{ treasure: '珍藏', book: '书房', film: '放映厅', music: '唱片馆', game: '游戏室', person: '人物长廊', website: '网站收藏' }[current]} · 会心馆` : '会心馆 · 会于心者，藏于此间。'; }, [current]);
   useEffect(() => { if (!toast) return; const timeout = window.setTimeout(() => setToast(''), 3200); return () => window.clearTimeout(timeout); }, [toast]);
   useEffect(() => { const listener = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !panel) { event.preventDefault(); setPanel({ type: 'search' }); } }; window.addEventListener('keydown', listener); return () => window.removeEventListener('keydown', listener); }, [panel]);
   function add(space?: SpaceId, subtype?: string) { setPanel({ type: 'add', space: space || (current && isSpaceId(current) ? current : 'book'), subtype }); }

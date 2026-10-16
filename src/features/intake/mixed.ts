@@ -11,8 +11,7 @@ export interface MixedEntry extends Omit<IntakeEntry, 'status'>, Destination {
 }
 export const destinations = [
   ['book:traditional', '书 · 传统文学'], ['book:web', '书 · 网文'], ['book:light', '书 · 轻小说'],
-  ['film:movie', '电影'], ['film:series', '电视剧'], ['music:song', '歌曲'], ['music:artist', '歌手'],
-  ['game:', '游戏'], ['person:', '人物'],
+  ['film:movie', '电影'], ['film:series', '电视剧'], ['person:', '人物'],
 ] as const;
 export function destinationValue(item: Destination) {
   return item.space && isValidSubtype(item.space, item.subtype ?? '') ? `${item.space}:${item.subtype ?? ''}` : '';
@@ -27,8 +26,7 @@ const headings: Record<string, Destination> = {
   书: { space: 'book' }, 书籍: { space: 'book' }, 书单: { space: 'book' }, 书房: { space: 'book' }, 小说: { space: 'book' },
   传统文学: { space: 'book', subtype: 'traditional' }, 网文: { space: 'book', subtype: 'web' }, 轻小说: { space: 'book', subtype: 'light' },
   电影: { space: 'film', subtype: 'movie' }, 片单: { space: 'film' }, 放映厅: { space: 'film' }, 电视剧: { space: 'film', subtype: 'series' },
-  歌曲: { space: 'music', subtype: 'song' }, 歌单: { space: 'music', subtype: 'song' }, 歌手: { space: 'music', subtype: 'artist' }, 音乐: { space: 'music' }, 唱片馆: { space: 'music' },
-  游戏: { space: 'game', subtype: '' }, 游戏室: { space: 'game', subtype: '' }, 人物: { space: 'person', subtype: '' }, 人物长廊: { space: 'person', subtype: '' },
+  人物: { space: 'person', subtype: '' }, 人物长廊: { space: 'person', subtype: '' },
 };
 export function parseMixedList(text: string, fallback: Destination = {}) {
   const groups: IntakeGroup[] = [{ id: 'root', label: '未分组', ...fallback }];

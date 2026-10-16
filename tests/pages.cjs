@@ -29,9 +29,9 @@ const server = http.createServer((req, res) => {
     await page.goto(`http://127.0.0.1:5894${base}`, {waitUntil:'networkidle'});
     await page.getByRole('navigation').first().waitFor({timeout:10000});
     await page.waitForFunction(() => [...document.querySelectorAll('img')].some(img => img.src.includes('home.webp') && img.complete && img.naturalWidth > 0));
-    for (const space of ['book','film','music','game','person']) {
+    for (const space of ['book','film','person','website']) {
       await page.locator(`a[href="#/${space}"]`).first().click();
-      await page.waitForFunction(name => [...document.querySelectorAll('img')].some(img => img.src.includes(`${name}.webp`) && img.complete && img.naturalWidth > 0), space);
+      await page.waitForFunction(name => [...document.querySelectorAll('img')].some(img => img.src.includes(`${name === 'website' ? 'home' : name}.webp`) && img.complete && img.naturalWidth > 0), space);
     }
     const manifest = await (await fetch(`http://127.0.0.1:5894${base}manifest.webmanifest`)).json();
     assert.equal(new URL(manifest.start_url, `http://localhost${base}`).pathname, base);
@@ -59,7 +59,7 @@ const server = http.createServer((req, res) => {
     await page.getByRole('navigation').first().waitFor();
     assert.deepEqual(errors, []);
     assert.deepEqual(failed, []);
-    console.log('PASS Pages: subpath navigation, six images, PWA icons/scope, empty collection database and offline reload');
+    console.log('PASS Pages: subpath navigation, active room images, PWA icons/scope, empty collection database and offline reload');
     await context.close();
   } finally { if (browser) await browser.close(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

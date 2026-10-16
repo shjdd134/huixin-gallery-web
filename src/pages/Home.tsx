@@ -22,7 +22,7 @@ export function Home({ items, onAdd, onOpen, onImport }: { onImport: () => void;
 
 
     <section className="spaces-section page-width" id="spaces" aria-labelledby="spaces-title">
-      <div className="section-heading"><div><h2 id="spaces-title">我的五个空间</h2><p>喜欢的事物，各有归处。</p></div><span className="section-metadata">{items.length ? `${items.length} 件收藏，慢慢积累` : '从喜欢开始'}</span></div>
+      <div className="section-heading"><div><h2 id="spaces-title">我的收藏空间</h2><p>喜欢的事物，各有归处。</p></div><span className="section-metadata">{items.length ? `${items.length} 件收藏，慢慢积累` : '从喜欢开始'}</span></div>
       <div className="space-grid">
         {spaces.map((space, index) => {
           const count = items.filter(item => item.space === space.id).length;

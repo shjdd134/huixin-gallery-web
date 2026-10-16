@@ -14,6 +14,7 @@ import './styles/covers.css';
 import './styles/dialogs.css';
 import './styles/update-notice.css';
 import './styles/mobile.css';
+import './styles/websites.css';
 import { initializeNative, isNativeApp } from './platform/native';
 declare const __BUILD_TAG__: string;
 document.documentElement.dataset.buildTag = __BUILD_TAG__;

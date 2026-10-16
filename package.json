@@ -12,7 +12,8 @@
     "build": "tsc -b && vite build --configLoader native",
     "preview": "vite preview --configLoader native --host 127.0.0.1 --port 4173",
     "test:e2e": "node tests/restore.cjs",
-    "test:pages": "node tests/pages.cjs"
+    "test:pages": "node tests/pages.cjs",
+    "test:websites": "node tests/websites.cjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
