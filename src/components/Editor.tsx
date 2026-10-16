@@ -7,7 +7,7 @@ import { spaces, getSpace, defaultSubtype, type SpaceId } from '../data/spaces';
 import { compressCover } from '../data/images';
 import { INTRODUCTION_MAX } from '../data/introduction';
 import { useDraftGuard } from './DraftGuard';
-import { searchBooks, coverUrl, fetchDescription, type BookHit } from '../data/openlibrary';
+import { searchBooks, coverUrl as olCoverUrl, fetchDescription, type BookHit } from '../data/openlibrary';
 
 export function Editor({ existing, initialSpace, initialSubtype, onClose, onSaved, onBatch }: { existing?: Collection; initialSpace: SpaceId; initialSubtype?: string; onClose: () => void; onSaved: (item: Collection) => void; onBatch?: () => void }) {
   const [item, setItem] = useState<Collection>(() => existing
@@ -65,7 +65,7 @@ export function Editor({ existing, initialSpace, initialSubtype, onClose, onSave
         introduction: introText ? { text: introText, sourceName: 'Open Library', sourceUrl: `https://openlibrary.org${hit.key}`, kind: 'official-summary' as const } : old.introduction,
       }));
       if (hit.coverId) {
-        const url = coverUrl(hit.coverId);
+        const url = olCoverUrl(hit.coverId);
         const blob = await fetch(url).then(r => r.blob());
         const file = new File([blob], 'cover.jpg', { type: blob.type || 'image/jpeg' });
         const image = await compressCover(file);
