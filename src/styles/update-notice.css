@@ -1,0 +1,10 @@
+.update-notice { position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translateX(-50%); display: flex; align-items: center; gap: 20px; max-width: calc(100vw - 28px); padding: 16px 22px; border-radius: var(--radius-panel); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 8px 30px #30271f22; }
+.update-notice-text strong { display: block; font-family: var(--serif); font-size: 16px; color: var(--ink); }
+.update-notice-text p { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.update-notice-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.update-notice-actions .update-apply { min-height: 40px; padding: 9px 18px; }
+@media (max-width: 700px) {
+  .update-notice { left: 14px; right: 14px; transform: none; flex-direction: column; align-items: stretch; gap: 12px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+  .update-notice-actions { justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) { .update-notice { transition: none; } }

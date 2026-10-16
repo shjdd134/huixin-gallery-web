@@ -1,0 +1,55 @@
+/* Original typographic jackets; these are not publishers' or films' official art. */
+.collection-cover.no-cover { display: block; padding: 0; }
+.editorial-cover { --jacket: #414f4a; --jacket-end: #253832; --jacket-ink: #f2e8d6; position: relative; isolation: isolate; width: 100%; height: 100%; overflow: hidden; padding: 24px; display: flex; flex-direction: column; color: var(--jacket-ink); background: linear-gradient(135deg, var(--jacket), var(--jacket-end)); box-shadow: inset 4px 0 8px #0002; }
+.editorial-cover::after { content: ''; position: absolute; inset: 10px; border: 1px solid #f5ecd329; pointer-events: none; }
+.cover-edition { font-size: 10px; letter-spacing: .15em; line-height: 1.7; opacity: .8; }
+.cover-title { position: relative; font-family: var(--serif); font-size: clamp(22px, 2.2vw, 31px); letter-spacing: .07em; line-height: 1.7; margin: auto 0; max-width: 9em; overflow-wrap: anywhere; text-wrap: balance; }
+.cover-title.long-title { font-size: clamp(19px, 1.7vw, 26px); }
+.cover-imprint { font-family: var(--serif); font-size: 10px; letter-spacing: .15em; opacity: .7; line-height: 1.8; }
+.cover-art { position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 1px solid #f3e3bf38; right: -60px; bottom: 45px; z-index: -1; box-shadow: 0 0 0 18px #e9d3a608, 0 0 0 19px #f3e3bf22, 0 0 0 36px #e9d3a606, 0 0 0 37px #f3e3bf14; }
+.cover-tone-1 { --jacket: #743e39; --jacket-end: #462724; }
+.cover-tone-2 { --jacket: #485363; --jacket-end: #252f3d; }
+.cover-tone-3 { --jacket: #79654a; --jacket-end: #4c3d2c; }
+.editorial-book { padding-left: 46px; }
+/* 书房：左侧装帧书脊带 + 布纹质感 */
+.editorial-book::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 30px; background: linear-gradient(90deg, #00000045, #00000014 76%, #f5e7c22e 98%); border-right: 1px solid #f5e7c226; }
+.editorial-book .cover-title, .editorial-book .cover-imprint { margin-left: 2px; }
+.editorial-film::before { content: ''; position: absolute; top: 0; bottom: 0; right: 9px; width: 7px; background: repeating-linear-gradient(0deg, #f5ecd32e 0 10px, transparent 10px 24px); }
+.editorial-film .cover-art { border-radius: 0; transform: rotate(28deg); width: 150px; height: 260px; bottom: -100px; right: -45px; }
+.editorial-music { --jacket: #34302b; --jacket-end: #211f1c; }
+.editorial-music .cover-art { width: 220px; height: 220px; right: -75px; bottom: -85px; border: 1px solid #d9c5a635; background: repeating-radial-gradient(circle, #171512 0 3px, #bfa47c15 4px, #171512 5px 8px); box-shadow: 0 0 0 1px #d6bf8e20; }
+.editorial-music .cover-art::after { content: ''; position: absolute; width: 60px; height: 60px; background: var(--jacket); border: 1px solid #ecd5aa50; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.editorial-game { --jacket: #425b51; --jacket-end: #203930; padding: 20px 24px 20px 42px; }
+/* 游戏室：盒装侧脊 */
+.editorial-game::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 28px; background: linear-gradient(90deg, #00000042, #00000012 84%, #ffffff16); border-right: 1px solid #ffffff1a; }
+.editorial-game .cover-title, .editorial-game .cover-imprint { margin-left: 2px; }
+.editorial-game.cover-tone-1 { --jacket: #4b5062; --jacket-end: #282c3c; }
+.editorial-game.cover-tone-2 { --jacket: #7c6244; --jacket-end: #443822; }
+.editorial-game.cover-tone-3 { --jacket: #6b4440; --jacket-end: #392726; }
+.editorial-game .cover-art { border-radius: 2px; transform: rotate(45deg); width: 140px; height: 140px; right: -70px; bottom: -45px; }
+/* 人物长廊：浅色肖像卡与姓名首字徽记 */
+.editorial-person { --jacket: #e9e0d2; --jacket-end: #ccc0aa; --jacket-ink: #46362a; }
+.editorial-person.cover-tone-1 { --jacket: #ddd2c0; --jacket-end: #b3a48b; }
+.editorial-person.cover-tone-2 { --jacket: #e2d8c8; --jacket-end: #bcb09a; }
+.editorial-person.cover-tone-3 { --jacket: #d8ccbb; --jacket-end: #a99a82; }
+.editorial-person::after { border-color: #6b55442b; }
+.editorial-person .cover-edition, .editorial-person .cover-imprint { opacity: .62; }
+.cover-monogram { font-family: var(--serif); font-size: clamp(54px, 6vw, 84px); line-height: 1; margin: auto; width: 1.72em; height: 1.72em; display: grid; place-items: center; border: 1px solid #6b554442; border-radius: 50%; color: #5d4634; box-shadow: 0 0 0 9px #fffdf93d, 0 0 0 10px #6b55442b; }
+.editorial-person .cover-title { font-size: clamp(17px, 1.5vw, 22px); margin-top: 4px; text-align: center; max-width: none; }
+.editorial-person .cover-imprint { text-align: center; }
+@media (max-width: 600px) {
+  .collection-cover.no-cover { padding: 0; }
+  .editorial-cover { padding: 18px; }
+  .cover-edition, .cover-imprint { font-size: 9px; letter-spacing: .07em; }
+  .cover-title { font-size: 22px; line-height: 1.65; }
+  .cover-title.long-title { font-size: 18px; }
+  .editorial-game { padding: 16px 16px 16px 34px; }
+  .editorial-game .cover-title { font-size: 19px; line-height: 1.55; }
+  .editorial-game .cover-imprint { display: none; }
+  .editorial-book { padding-left: 36px; }
+  .editorial-book::before, .editorial-game::before { width: 22px; }
+  .cover-monogram { font-size: 46px; }
+  .editorial-person .cover-title { font-size: 16px; }
+}
+
+.detail-cover.no-cover { display: block; padding: 0; }
