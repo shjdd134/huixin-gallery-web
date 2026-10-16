@@ -71,7 +71,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--wine); }
 .detail-markers { display: flex; flex-wrap: wrap; gap: 8px; }
 .detail-edit { margin-left: auto; white-space: nowrap; }
 .detail-markers .choice-button { font-size: 13px; padding-inline: 11px; }
-.detail-note { padding: 8px 0; }
+.detail-note { margin-top: 4px;  padding: 8px 0; }
 .detail-section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
 .detail-section-heading h4 { font-weight: 400; font-family: var(--serif); font-size: 20px; letter-spacing: .02em; line-height: 1.5; }
 .detail-section-heading .text-button { flex-shrink: 0; white-space: nowrap; }
